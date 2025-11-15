@@ -21,6 +21,34 @@ fi
 ERROR_LOG=$(mktemp)
 trap "rm -f $ERROR_LOG" EXIT
 
+continuous_claude_commit() {
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        return 0
+    fi
+
+    if git diff --quiet && git diff --cached --quiet; then
+        echo "➖ $iteration_display No changes detected" >&2
+        return 0
+    fi
+
+    echo "💬 $iteration_display Committing changes..." >&2
+    
+    commit_prompt="Please review the dirty files in the git repository, write a commit message with: (1) a short one-line summary, (2) two newlines, (3) then a detailed explanation. Do not include any footers or metadata like 'Generated with Claude Code' or 'Co-Authored-By'. Track all files and commit the changes using 'git commit -am \"your message\"' (don't push, just commit, no need to ask for confirmation)."
+    
+    if commit_result=$(claude -p "$commit_prompt" --allowedTools "Bash(git)" --dangerously-skip-permissions 2>&1); then
+        # Check if commit actually happened
+        if git diff --quiet && git diff --cached --quiet; then
+            echo "📦 $iteration_display Changes committed" >&2
+        else
+            echo "⚠️  $iteration_display Commit command ran but changes still present" >&2
+            echo "$commit_result" >&2
+        fi
+    else
+        echo "⚠️  $iteration_display Failed to commit changes" >&2
+        echo "$commit_result" >&2
+    fi
+}
+
 error_count=0
 extra_iterations=0
 successful_iterations=0
@@ -33,11 +61,11 @@ while [ $MAX_RUNS -eq 0 ] || [ $successful_iterations -lt $MAX_RUNS ]; do
         total_iterations=$((MAX_RUNS + extra_iterations))
         iteration_display="($i/$total_iterations)"
     fi
-    
+
     echo "🔄 $iteration_display Starting iteration..." >&2
-    
+
     iteration_failed=false
-    
+
     if ! result=$(claude -p "$PROMPT" $ADDITIONAL_FLAGS 2>$ERROR_LOG); then
         error_count=$((error_count + 1))
         extra_iterations=$((extra_iterations + 1))
@@ -94,9 +122,12 @@ while [ $MAX_RUNS -eq 0 ] || [ $successful_iterations -lt $MAX_RUNS ]; do
             extra_iterations=$((extra_iterations - 1))
         fi
         
+        echo "📝 $iteration_display Output:" >&2
         result_text=$(echo "$result" | jq -r '.result // empty')
         if [ -n "$result_text" ]; then
             echo "$result_text"
+        else
+            echo "(no output)" >&2
         fi
 
         cost=$(echo "$result" | jq -r '.total_cost_usd // empty')
@@ -106,13 +137,14 @@ while [ $MAX_RUNS -eq 0 ] || [ $successful_iterations -lt $MAX_RUNS ]; do
         fi
 
         echo "✅ $iteration_display Work completed" >&2
+        continuous_claude_commit
         successful_iterations=$((successful_iterations + 1))
     fi
 
     if [ $MAX_RUNS -eq 0 ] || [ $successful_iterations -lt $MAX_RUNS ]; then
         sleep 1
     fi
-    
+
     i=$((i + 1))
 done
 
