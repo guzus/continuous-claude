@@ -35,6 +35,7 @@ chmod +x continuous_claude.sh
 - `--owner`: GitHub repository owner (required)
 - `--repo`: GitHub repository name (required)
 - `--git-branch-prefix`: Prefix for git branch names (default: `continuous-claude/`)
+- `--disable-commits`: Disable automatic git commits, PR creation, and merging (useful for testing)
 
 ## 📝 Examples
 
@@ -47,6 +48,9 @@ chmod +x continuous_claude.sh
 
 # Use custom branch prefix
 ./continuous_claude.sh -p "refactor code" -m 3 --owner AnandChowdhary --repo continuous-claude --git-branch-prefix "feature/"
+
+# Test without creating commits or PRs
+./continuous_claude.sh -p "test changes" -m 2 --owner AnandChowdhary --repo continuous-claude --disable-commits
 ```
 
 ## 📃 License

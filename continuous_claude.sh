@@ -4,6 +4,7 @@ ADDITIONAL_FLAGS="--dangerously-skip-permissions --output-format json"
 
 PROMPT=""
 MAX_RUNS=""
+ENABLE_COMMITS=true
 GIT_BRANCH_PREFIX="continuous-claude/"
 GITHUB_OWNER=""
 GITHUB_REPO=""
@@ -37,6 +38,10 @@ parse_arguments() {
                 GITHUB_REPO="$2"
                 shift 2
                 ;;
+            --disable-commits)
+                ENABLE_COMMITS=false
+                shift
+                ;;
             *)
                 shift
                 ;;
@@ -47,13 +52,13 @@ parse_arguments() {
 validate_arguments() {
     if [ -z "$PROMPT" ]; then
         echo "❌ Error: Prompt is required. Use -p to provide a prompt." >&2
-        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo" >&2
+        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo [--disable-commits]" >&2
         exit 1
     fi
 
     if [ -z "$MAX_RUNS" ]; then
         echo "❌ Error: MAX_RUNS is required. Use -m to provide max runs (0 for infinite)." >&2
-        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo" >&2
+        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo [--disable-commits]" >&2
         exit 1
     fi
 
@@ -64,13 +69,13 @@ validate_arguments() {
 
     if [ -z "$GITHUB_OWNER" ]; then
         echo "❌ Error: GitHub owner is required. Use --owner to provide the owner." >&2
-        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo" >&2
+        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo [--disable-commits]" >&2
         exit 1
     fi
 
     if [ -z "$GITHUB_REPO" ]; then
         echo "❌ Error: GitHub repo is required. Use --repo to provide the repo." >&2
-        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo" >&2
+        echo "Usage: $0 -p \"your prompt\" -m max_runs --owner owner --repo repo [--disable-commits]" >&2
         exit 1
     fi
 }
@@ -295,8 +300,8 @@ run_claude_iteration() {
     local prompt="$1"
     local flags="$2"
     local error_log="$3"
-    
-    claude -p "$prompt" $flags 2> >(tee "$error_log" >&2)
+
+    claude -p "$prompt" $flags 2> >(tee "$error_log" >&2) | tee >(cat >&2)
 }
 
 parse_claude_result() {
@@ -369,15 +374,19 @@ handle_iteration_success() {
     fi
 
     echo "✅ $iteration_display Work completed" >&2
-    if ! continuous_claude_commit "$iteration_display" "$iteration_num"; then
-        error_count=$((error_count + 1))
-        extra_iterations=$((extra_iterations + 1))
-        echo "❌ $iteration_display PR merge queue failed ($error_count consecutive errors)" >&2
-        if [ $error_count -ge 3 ]; then
-            echo "❌ Fatal: 3 consecutive errors occurred. Exiting." >&2
-            exit 1
+    if [ "$ENABLE_COMMITS" = "true" ]; then
+        if ! continuous_claude_commit "$iteration_display" "$iteration_num"; then
+            error_count=$((error_count + 1))
+            extra_iterations=$((extra_iterations + 1))
+            echo "❌ $iteration_display PR merge queue failed ($error_count consecutive errors)" >&2
+            if [ $error_count -ge 3 ]; then
+                echo "❌ Fatal: 3 consecutive errors occurred. Exiting." >&2
+                exit 1
+            fi
+            return 1
         fi
-        return 1
+    else
+        echo "⏭️  $iteration_display Skipping commits (--disable-commits flag set)" >&2
     fi
     
     error_count=0
