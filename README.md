@@ -5,9 +5,14 @@ Automated wrapper for Claude Code that runs tasks repeatedly with automatic git 
 ## 🚀 Quick start
 
 ```bash
-curl -o run_claude.sh https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/heads/main/run_claude.sh
-chmod +x run_claude.sh
-./run_claude.sh -p "your prompt" -m max_runs
+# Download the script
+curl -o continuous_claude.sh https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/heads/main/continuous_claude.sh
+
+# Make it executable
+chmod +x continuous_claude.sh
+
+# Run it with your prompt and infinite max runs
+./continuous_claude.sh --prompt "add unit tests until all code is covered" --max-runs 0
 ```
 
 ## 🎯 Flags
@@ -19,10 +24,10 @@ chmod +x run_claude.sh
 
 ```bash
 # Run 5 iterations
-./run_claude.sh -p "improve code quality" -m 5
+./continuous_claude.sh -p "improve code quality" -m 5
 
 # Run infinitely until stopped
-./run_claude.sh -p "add unit tests until all code is covered" -m 0
+./continuous_claude.sh -p "add unit tests until all code is covered" -m 0
 ```
 
 ## 📃 License
