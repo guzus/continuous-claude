@@ -87,6 +87,48 @@ jobs:
           if [ "$LATEST_TAG" = "$NEW_VERSION" ]; then
             echo "⏭️  No new commits to release (version unchanged: $LATEST_TAG)"
             echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if continuous_claude.sh has changed since last tag
+          if [ "$LATEST_TAG" != "v0.0.0" ]; then
+            if ! git diff --quiet ${LATEST_TAG}..HEAD -- continuous_claude.sh; then
+              echo "✅ continuous_claude.sh has changed since $LATEST_TAG"
+              SCRIPT_CHANGED=true
+            else
+              echo "⏭️  continuous_claude.sh unchanged since $LATEST_TAG"
+              SCRIPT_CHANGED=false
+            fi
+          else
+            # First release, script is considered changed
+            SCRIPT_CHANGED=true
+          fi
+
+          # Get commits since last tag
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s" --no-merges)
+          else
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" --no-merges)
+          fi
+
+          # Check if all commits are test/CI/docs related
+          # Test-related gitmojis: :construction_worker:, :white_check_mark:, :green_heart:, :pencil:
+          # Conventional commits: test:, ci:, docs:
+          TEST_ONLY=true
+          while IFS= read -r commit; do
+            if ! echo "$commit" | grep -qiE "^(:construction_worker:|:white_check_mark:|:green_heart:|:pencil:|test:|ci:|docs:)"; then
+              TEST_ONLY=false
+              break
+            fi
+          done <<< "$COMMITS"
+
+          # Skip release if script unchanged OR all commits are test-only
+          if [ "$SCRIPT_CHANGED" = "false" ]; then
+            echo "⏭️  Skipping release: continuous_claude.sh unchanged"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          elif [ "$TEST_ONLY" = "true" ]; then
+            echo "⏭️  Skipping release: only test/CI/docs changes"
+            echo "should_release=false" >> $GITHUB_OUTPUT
           else
             echo "✅ Will create release: $LATEST_TAG → $NEW_VERSION"
             echo "should_release=true" >> $GITHUB_OUTPUT
