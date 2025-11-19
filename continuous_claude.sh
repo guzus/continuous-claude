@@ -495,6 +495,24 @@ merge_pr_and_cleanup() {
     local iteration_display="$5"
     local current_branch="$6"
 
+    echo "🔄 $iteration_display Updating branch with latest from main..." >&2
+    local update_output
+    if update_output=$(gh pr update-branch "$pr_number" --repo "$owner/$repo" 2>&1); then
+        echo "📥 $iteration_display Branch updated, re-checking PR status..." >&2
+        if ! wait_for_pr_checks "$pr_number" "$owner" "$repo" "$iteration_display"; then
+            echo "❌ $iteration_display PR checks failed after branch update" >&2
+            return 1
+        fi
+    else
+        # Check if update failed due to conflicts or just because branch is already up-to-date
+        if echo "$update_output" | grep -qi "already up-to-date\|is up to date"; then
+            echo "✅ $iteration_display Branch already up-to-date" >&2
+        else
+            echo "⚠️  $iteration_display Branch update failed: $update_output" >&2
+            return 1
+        fi
+    fi
+
     # Map merge strategy to gh pr merge flag
     local merge_flag=""
     case "$MERGE_STRATEGY" in
