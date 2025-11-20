@@ -41,10 +41,17 @@ jobs:
           # Fetch all tags to ensure we have the latest
           git fetch --tags --force
 
-          # Get the latest tag, or use v0.0.0 if no tags exist
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Get the latest production release tag (excluding pre-release tags like -dev, -pr, -alpha, -beta, -rc)
+          # Filter out tags with hyphens (pre-release markers) and get the latest semver tag
+          LATEST_TAG=$(git tag -l "v*.*.*" | grep -v "-" | sort -V | tail -n 1)
+
+          # If no production tags exist, use v0.0.0
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          echo "Latest tag: $LATEST_TAG"
+          echo "Latest production tag: $LATEST_TAG"
 
       - name: Determine version bump
         id: version_bump
