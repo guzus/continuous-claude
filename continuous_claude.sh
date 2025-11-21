@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v0.8.5"
+VERSION="v0.9.0"
 
 ADDITIONAL_FLAGS="--dangerously-skip-permissions --output-format json"
 

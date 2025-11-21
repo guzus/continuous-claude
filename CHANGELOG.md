@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [v0.9.0] - 2025-11-21
+
+### What's Changed
+
+- :sparkles: Delete remote branch while closing PR (0bca6f9)
+
+**Full Changelog**: https://github.com/AnandChowdhary/continuous-claude/compare/v0.8.5...v0.9.0
+
+### Installation
+
+Install with a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/tags/v0.9.0/install.sh | bash
+```
+
+Or download the script directly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/tags/v0.9.0/continuous_claude.sh -o continuous-claude
+chmod +x continuous-claude
+sudo mv continuous-claude /usr/local/bin/
+```
+
 ## [v0.8.5] - 2025-11-20
 
 ### What's Changed
