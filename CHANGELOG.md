@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [v0.11.0] - 2025-11-26
+
+### What's Changed
+
+- :sparkles: Auto-detect GitHub owner and repo from git remote (#33) (1c76c30)
+
+**Full Changelog**: https://github.com/AnandChowdhary/continuous-claude/compare/v0.10.0...v0.11.0
+
+### Installation
+
+Install with a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/tags/v0.11.0/install.sh | bash
+```
+
+Or download the script directly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AnandChowdhary/continuous-claude/refs/tags/v0.11.0/continuous_claude.sh -o continuous-claude
+chmod +x continuous-claude
+sudo mv continuous-claude /usr/local/bin/
+```
+
 ## [v0.10.0] - 2025-11-26
 
 ### What's Changed
