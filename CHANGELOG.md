@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [v0.14.0] - 2025-11-30
+
+### What's Changed
+
+- :recycle: Refine waiting logic in wait_for_pr_checks function (d246e62)
+- :sparkles: Improve waiting message logic with dots for each check (f7187af)
+- :construction_worker: Update CHANGELOG and release workflow to exclude installation instructions (803e99f)
+
+**Full Changelog**: https://github.com/AnandChowdhary/continuous-claude/compare/v0.13.0...v0.14.0
+
+
 ## [v0.13.0] - 2025-11-28
 
 ### What's Changed
