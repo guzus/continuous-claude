@@ -1412,13 +1412,26 @@ setup() {
 @test "wait_for_pr_checks prints initial waiting message once" {
     source "$SCRIPT_PATH"
     
-    # Mock gh to return empty checks array (waiting for checks to start)
+    # Use a counter that persists across function calls
+    echo "0" > "$BATS_TEST_TMPDIR/gh_call_count"
+    
+    # Mock gh to return empty checks for first call, then return checks to exit quickly
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "checks" ]; then
-            echo "[]"
+            local count=$(cat "$BATS_TEST_TMPDIR/gh_call_count")
+            count=$((count + 1))
+            echo "$count" > "$BATS_TEST_TMPDIR/gh_call_count"
+            
+            if [ $count -eq 1 ]; then
+                # First call: return empty checks to trigger waiting message
+                echo "[]"
+            else
+                # Second call: return checks to exit quickly
+                echo '[{"state": "completed", "bucket": "success"}]'
+            fi
             return 0
         elif [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            echo '{"reviewDecision": null, "reviewRequests": []}'
+            echo '{"reviewDecision": "APPROVED", "reviewRequests": []}'
             return 0
         fi
         return 1
@@ -1431,16 +1444,18 @@ setup() {
     
     export -f gh sleep
     
-    # Run with a short timeout to capture initial output
-    run timeout 1 bash -c "
+    # Run the function - it should complete quickly with mocked sleep
+    run bash -c "
         source '$SCRIPT_PATH'
         wait_for_pr_checks 123 'owner' 'repo' '(1/1)' 2>&1
-    " || true
+    "
     
     # Should contain the initial waiting message
     assert_output --partial "⏳ Waiting for checks to start"
     # Should contain at least one dot
     assert_output --partial "."
+    
+    rm -f "$BATS_TEST_TMPDIR/gh_call_count"
 }
 
 @test "wait_for_pr_checks prints dots on each waiting iteration" {

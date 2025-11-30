@@ -888,7 +888,7 @@ wait_for_pr_checks() {
             prev_no_checks_configured="$no_checks_configured"
         fi
 
-        if [ "$check_count" -eq 0 ] && [ "$checks_json" != "" ] && [ "$checks_json" != "[]" ] && [ "$no_checks_configured" = "false" ]; then
+        if [ "$check_count" -eq 0 ] && [ "$checks_json" = "[]" ] && [ "$no_checks_configured" = "false" ]; then
             if [ "$iteration" -lt 18 ]; then
                 if [ "$waiting_message_printed" = "false" ]; then
                     echo -n "⏳ Waiting for checks to start... (will timeout after 3 minutes) " >&2
