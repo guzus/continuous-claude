@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v0.2.0] - 2025-12-26
+
+### What's Changed
+
+- :sparkles: Add GitHub release creation to auto-release workflow (#5) (6a44621)
+
+**Full Changelog**: https://github.com/guzus/continuous-claude/compare/v0.1.1...v0.2.0
+
 ## [v0.1.1] - 2025-12-26
 
 ### What's Changed
