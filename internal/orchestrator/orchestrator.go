@@ -35,6 +35,11 @@ type Orchestrator struct {
 func New(cfg *config.Config, workDir string) (*Orchestrator, error) {
 	gitClient := git.NewClient(workDir)
 
+	// Check if we're in a git repository first
+	if !gitClient.IsRepo() {
+		return nil, fmt.Errorf("not in a git repository\n\nContinuous Claude requires a local git repository to work in.\nPlease run from inside a cloned repository:\n  git clone https://github.com/OWNER/REPO.git\n  cd REPO\n  continuous-claude -p \"your task\"")
+	}
+
 	// Detect owner/repo if not provided
 	owner := cfg.Owner
 	repo := cfg.Repo
@@ -51,10 +56,10 @@ func New(cfg *config.Config, workDir string) (*Orchestrator, error) {
 		}
 	}
 
-	// Get current branch
+	// Get current branch (requires at least one commit)
 	baseBranch, err := gitClient.CurrentBranch()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get current branch: %w", err)
+		return nil, fmt.Errorf("failed to get current branch: %w\n\nThis usually means the repository has no commits yet.\nPlease make an initial commit first:\n  git add . && git commit -m \"Initial commit\"", err)
 	}
 
 	return &Orchestrator{
@@ -300,10 +305,13 @@ func (o *Orchestrator) runIteration() error {
 
 	if err != nil {
 		o.ui.Warning("Timeout waiting for checks: %v", err)
+		// Can't determine check status, skip merge and continue to next iteration
+		_ = o.git.SwitchBranch(o.baseBranch)
+		return nil
 	}
 
 	// Handle check results
-	if status.HasFailedChecks {
+	if status == nil || status.HasFailedChecks {
 		o.ui.Error("Checks failed, closing PR")
 		_ = o.github.ClosePR(prNumber, true)
 		_ = o.git.SwitchBranch(o.baseBranch)

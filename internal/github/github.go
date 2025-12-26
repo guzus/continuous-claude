@@ -84,13 +84,22 @@ func GetPRNumber(prURL string) string {
 func (c *Client) GetPRChecks(prNumber string) ([]PRCheck, error) {
 	cmd := exec.Command("gh", "pr", "checks", prNumber, "--json", "name,state,bucket")
 	cmd.Dir = c.workDir
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
+		outputStr := string(output)
 		// If no checks configured, return empty list
-		if strings.Contains(string(output), "no checks") {
+		if strings.Contains(outputStr, "no checks") ||
+			strings.Contains(outputStr, "no check runs") ||
+			strings.Contains(outputStr, "could not find any checks") {
 			return []PRCheck{}, nil
 		}
-		return nil, fmt.Errorf("failed to get PR checks: %w", err)
+		return nil, fmt.Errorf("failed to get PR checks: %w\n%s", err, outputStr)
+	}
+
+	// Handle empty output (no checks)
+	trimmed := strings.TrimSpace(string(output))
+	if trimmed == "" || trimmed == "[]" {
+		return []PRCheck{}, nil
 	}
 
 	var checks []PRCheck
