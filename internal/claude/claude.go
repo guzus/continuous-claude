@@ -151,7 +151,7 @@ func parseClaudeOutput(output string, result *Result) error {
 		var lastItem struct {
 			Cost float64 `json:"total_cost_usd"`
 		}
-		json.Unmarshal(arrayResult[len(arrayResult)-1], &lastItem)
+		_ = json.Unmarshal(arrayResult[len(arrayResult)-1], &lastItem)
 		result.Cost = lastItem.Cost
 		return nil
 	}

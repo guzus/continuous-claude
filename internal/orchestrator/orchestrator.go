@@ -231,8 +231,8 @@ func (o *Orchestrator) runIteration() error {
 	if o.config.DryRun {
 		o.ui.Info("Dry run mode, skipping commit and PR")
 		// Switch back to base branch and delete feature branch
-		o.git.SwitchBranch(o.baseBranch)
-		o.git.DeleteBranch(branchName)
+		_ = o.git.SwitchBranch(o.baseBranch)
+		_ = o.git.DeleteBranch(branchName)
 		return nil
 	}
 
@@ -248,8 +248,8 @@ func (o *Orchestrator) runIteration() error {
 
 	if !hasChanges {
 		o.ui.Info("No changes to commit")
-		o.git.SwitchBranch(o.baseBranch)
-		o.git.DeleteBranch(branchName)
+		_ = o.git.SwitchBranch(o.baseBranch)
+		_ = o.git.DeleteBranch(branchName)
 		return nil
 	}
 
@@ -305,14 +305,14 @@ func (o *Orchestrator) runIteration() error {
 	// Handle check results
 	if status.HasFailedChecks {
 		o.ui.Error("Checks failed, closing PR")
-		o.github.ClosePR(prNumber, true)
-		o.git.SwitchBranch(o.baseBranch)
+		_ = o.github.ClosePR(prNumber, true)
+		_ = o.git.SwitchBranch(o.baseBranch)
 		return nil
 	}
 
 	if !status.IsMergeable {
 		o.ui.Warning("PR not mergeable (review required?)")
-		o.git.SwitchBranch(o.baseBranch)
+		_ = o.git.SwitchBranch(o.baseBranch)
 		return nil
 	}
 
@@ -326,8 +326,8 @@ func (o *Orchestrator) runIteration() error {
 	o.ui.Success("Merged PR")
 
 	// Pull changes to base branch
-	o.git.SwitchBranch(o.baseBranch)
-	o.git.Pull(o.baseBranch)
+	_ = o.git.SwitchBranch(o.baseBranch)
+	_ = o.git.Pull(o.baseBranch)
 
 	o.ui.Duration(time.Since(o.startTime), o.config.MaxDuration)
 

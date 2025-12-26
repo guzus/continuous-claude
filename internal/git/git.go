@@ -296,7 +296,7 @@ func (c *Client) Run(args ...string) (string, error) {
 
 func generateShortHash() string {
 	b := make([]byte, 4)
-	rand.Read(b)
+	_, _ = rand.Read(b) // Error ignored: fallback to zero bytes is acceptable
 	return hex.EncodeToString(b)
 }
 

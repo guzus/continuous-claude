@@ -225,7 +225,7 @@ func (p *Printer) Table(headers []string, rows [][]string) {
 func (p *Printer) Prompt(message string) string {
 	fmt.Printf("%s %s: ", Blue("?"), message)
 	var input string
-	fmt.Scanln(&input)
+	_, _ = fmt.Scanln(&input)
 	return strings.TrimSpace(input)
 }
 
@@ -233,7 +233,7 @@ func (p *Printer) Prompt(message string) string {
 func (p *Printer) Confirm(message string) bool {
 	fmt.Printf("%s %s [y/N]: ", Yellow("?"), message)
 	var input string
-	fmt.Scanln(&input)
+	_, _ = fmt.Scanln(&input)
 	input = strings.ToLower(strings.TrimSpace(input))
 	return input == "y" || input == "yes"
 }
