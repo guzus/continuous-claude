@@ -81,8 +81,9 @@ func GetPRNumber(prURL string) string {
 }
 
 // GetPRChecks returns the CI/CD checks for a PR.
+// Uses 'gh pr view --json statusCheckRollup' for broader gh CLI compatibility.
 func (c *Client) GetPRChecks(prNumber string) ([]PRCheck, error) {
-	cmd := exec.Command("gh", "pr", "checks", prNumber, "--json", "name,state,bucket")
+	cmd := exec.Command("gh", "pr", "view", prNumber, "--json", "statusCheckRollup")
 	cmd.Dir = c.workDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -96,15 +97,43 @@ func (c *Client) GetPRChecks(prNumber string) ([]PRCheck, error) {
 		return nil, fmt.Errorf("failed to get PR checks: %w\n%s", err, outputStr)
 	}
 
-	// Handle empty output (no checks)
-	trimmed := strings.TrimSpace(string(output))
-	if trimmed == "" || trimmed == "[]" {
-		return []PRCheck{}, nil
+	// Parse the statusCheckRollup response
+	var result struct {
+		StatusCheckRollup []struct {
+			Name       string `json:"name"`
+			Context    string `json:"context"`
+			State      string `json:"state"`
+			Status     string `json:"status"`
+			Conclusion string `json:"conclusion"`
+		} `json:"statusCheckRollup"`
+	}
+	if err := json.Unmarshal(output, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse PR checks: %w", err)
 	}
 
+	// Convert to PRCheck format
 	var checks []PRCheck
-	if err := json.Unmarshal(output, &checks); err != nil {
-		return nil, fmt.Errorf("failed to parse PR checks: %w", err)
+	for _, c := range result.StatusCheckRollup {
+		name := c.Name
+		if name == "" {
+			name = c.Context
+		}
+
+		// Map state/status/conclusion to our state format
+		state := c.State
+		if state == "" {
+			// Use conclusion if state is empty (completed checks)
+			if c.Conclusion != "" {
+				state = strings.ToUpper(c.Conclusion)
+			} else if c.Status != "" {
+				state = strings.ToUpper(c.Status)
+			}
+		}
+
+		checks = append(checks, PRCheck{
+			Name:  name,
+			State: state,
+		})
 	}
 
 	return checks, nil
