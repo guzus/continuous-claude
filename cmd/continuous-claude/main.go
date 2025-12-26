@@ -9,7 +9,7 @@ import (
 
 // Version information - set at build time
 var (
-	Version   = "0.2.2"
+	Version   = "0.2.3"
 	BuildDate = "unknown"
 	GitCommit = "unknown"
 )

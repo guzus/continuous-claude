@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.2.3] - 2025-12-26
+
+### What's Changed
+
+- Claude/automate binary releases ut jz o (#7) (9391fd1)
+
 ## [v0.2.2] - 2025-12-26
 
 ### What's Changed
