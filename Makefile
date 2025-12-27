@@ -1,7 +1,7 @@
-# Continuous Claude Makefile
+# Deep Claude Makefile
 
 # Build variables
-BINARY_NAME := continuous-claude
+BINARY_NAME := dclaude
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -20,8 +20,8 @@ LDFLAGS := -ldflags "-s -w \
 
 # Directories
 BUILD_DIR := build
-CMD_DIR := cmd/continuous-claude
-REMOTE_HOST ?= continuous-claude-vm
+CMD_DIR := cmd/dclaude
+REMOTE_HOST ?= deep-claude-vm
 REMOTE_DIR ?= ~
 LINUX_AMD64_BIN := $(BUILD_DIR)/$(BINARY_NAME)-linux-amd64
 
@@ -121,11 +121,14 @@ dev:
 # Build Linux amd64 and copy to a remote host via scp.
 scp-linux: build-linux
 	@echo "Copying $(LINUX_AMD64_BIN) to $(REMOTE_HOST)..."
-	scp $(LINUX_AMD64_BIN) $(REMOTE_HOST):$(REMOTE_DIR)/continuous-claude-linux
+	scp $(LINUX_AMD64_BIN) $(REMOTE_HOST):$(REMOTE_DIR)/dclaude
+	@echo "Setting up dclaude alias on remote..."
+	ssh $(REMOTE_HOST) "grep -q 'alias dclaude=' ~/.bashrc || echo 'alias dclaude=\"~/dclaude\"' >> ~/.bashrc"
+	@echo "Done. Run 'source ~/.bashrc' on remote or reconnect to use 'dclaude' command."
 
 # Help
 help:
-	@echo "Continuous Claude - Build Commands"
+	@echo "Deep Claude - Build Commands"
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""

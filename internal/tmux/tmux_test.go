@@ -33,7 +33,7 @@ func TestSanitizePrompt(t *testing.T) {
 func TestGenerateSessionName(t *testing.T) {
 	name := GenerateSessionName("Add test coverage")
 
-	// Should start with cc-
+	// Should start with dc-
 	if !strings.HasPrefix(name, SessionPrefix) {
 		t.Errorf("session name should start with %q, got %q", SessionPrefix, name)
 	}
@@ -43,7 +43,7 @@ func TestGenerateSessionName(t *testing.T) {
 		t.Errorf("session name should contain sanitized prompt, got %q", name)
 	}
 
-	// Should have datetime format (cc-YYMMDD-HHMM-...)
+	// Should have datetime format (dc-YYMMDD-HHMM-...)
 	parts := strings.Split(name, "-")
 	if len(parts) < 4 {
 		t.Errorf("session name should have at least 4 parts separated by -, got %q", name)

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	// SessionPrefix is the prefix for all continuous-claude tmux sessions.
-	SessionPrefix = "cc-"
+	// SessionPrefix is the prefix for all deep-claude tmux sessions.
+	SessionPrefix = "dc-"
 	// MaxPromptLength is the maximum length of the sanitized prompt in session names.
 	MaxPromptLength = 30
 )
@@ -111,7 +111,7 @@ func SessionExists(name string) bool {
 	return cmd.Run() == nil
 }
 
-// ListSessions returns all continuous-claude tmux sessions (those starting with cc-).
+// ListSessions returns all deep-claude tmux sessions (those starting with dc-).
 func ListSessions() ([]Session, error) {
 	if !IsAvailable() {
 		return nil, fmt.Errorf("tmux is not installed")

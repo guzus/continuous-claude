@@ -1,4 +1,4 @@
-// Package cli provides the command-line interface for Continuous Claude.
+// Package cli provides the command-line interface for Deep Claude.
 package cli
 
 import (
@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/guzus/continuous-claude/internal/config"
-	"github.com/guzus/continuous-claude/internal/git"
-	"github.com/guzus/continuous-claude/internal/github"
-	"github.com/guzus/continuous-claude/internal/orchestrator"
-	"github.com/guzus/continuous-claude/internal/tmux"
-	"github.com/guzus/continuous-claude/internal/ui"
-	"github.com/guzus/continuous-claude/internal/version"
+	"github.com/guzus/deep-claude/internal/config"
+	"github.com/guzus/deep-claude/internal/git"
+	"github.com/guzus/deep-claude/internal/github"
+	"github.com/guzus/deep-claude/internal/orchestrator"
+	"github.com/guzus/deep-claude/internal/tmux"
+	"github.com/guzus/deep-claude/internal/ui"
+	"github.com/guzus/deep-claude/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -33,18 +33,18 @@ func Execute(ver, buildDate, gitCommit string) error {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "continuous-claude",
-	Short: "Continuous Claude - Autonomous AI development with GitHub integration",
-	Long: `Continuous Claude orchestrates Claude Code to run iteratively with full GitHub integration.
+	Use:   "dclaude",
+	Short: "Deep Claude - Autonomous AI development with GitHub integration",
+	Long: `Deep Claude orchestrates Claude Code to run iteratively with full GitHub integration.
 
 It automates the entire PR lifecycle for large, multi-iteration AI development tasks -
 enabling Claude to autonomously create PRs, monitor CI/CD checks, handle reviews,
 and merge changes while maintaining persistent context across runs.
 
 Example:
-  continuous-claude -p "Add comprehensive test coverage" --max-runs 5
-  continuous-claude -p "Refactor authentication" --max-cost 10.00
-  continuous-claude -p "Fix all linting errors" --max-duration 2h`,
+  dclaude -p "Add comprehensive test coverage" --max-runs 5
+  dclaude -p "Refactor authentication" --max-cost 10.00
+  dclaude -p "Fix all linting errors" --max-duration 2h`,
 	RunE: runMain,
 }
 
@@ -88,18 +88,18 @@ func init() {
 	rootCmd.Flags().StringVar(&owner, "owner", "", "GitHub repository owner (auto-detected)")
 	rootCmd.Flags().StringVar(&repo, "repo", "", "GitHub repository name (auto-detected)")
 	rootCmd.Flags().StringVar(&mergeStrategy, "merge-strategy", "squash", "PR merge strategy: squash, merge, rebase")
-	rootCmd.Flags().StringVar(&gitBranchPrefix, "git-branch-prefix", "continuous-claude/", "Branch name prefix")
+	rootCmd.Flags().StringVar(&gitBranchPrefix, "git-branch-prefix", "deep-claude/", "Branch name prefix")
 	rootCmd.Flags().StringVar(&notesFile, "notes-file", "SHARED_TASK_NOTES.md", "Path to notes file for context")
 
 	// Execution options
 	rootCmd.Flags().BoolVar(&disableCommits, "disable-commits", false, "Run without creating commits/PRs")
 	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Simulate without making changes")
-	rootCmd.Flags().StringVar(&completionSignal, "completion-signal", "CONTINUOUS_CLAUDE_PROJECT_COMPLETE", "Signal phrase for early stop")
+	rootCmd.Flags().StringVar(&completionSignal, "completion-signal", "DEEP_CLAUDE_PROJECT_COMPLETE", "Signal phrase for early stop")
 	rootCmd.Flags().IntVar(&completionThreshold, "completion-threshold", 3, "Consecutive signals needed to stop")
 
 	// Worktree options
 	rootCmd.Flags().StringVar(&worktree, "worktree", "", "Name for git worktree (parallel execution)")
-	rootCmd.Flags().StringVar(&worktreeBaseDir, "worktree-base-dir", "../continuous-claude-worktrees", "Base directory for worktrees")
+	rootCmd.Flags().StringVar(&worktreeBaseDir, "worktree-base-dir", "../deep-claude-worktrees", "Base directory for worktrees")
 	rootCmd.Flags().BoolVar(&cleanupWorktree, "cleanup-worktree", false, "Remove worktree after completion")
 
 	// Update options
@@ -200,8 +200,8 @@ var listWorktreesCmd = &cobra.Command{
 
 var sessionsCmd = &cobra.Command{
 	Use:   "sessions",
-	Short: "List and select active continuous-claude tmux sessions",
-	Long: `List active continuous-claude tmux sessions with interactive selection.
+	Short: "List and select active deep-claude tmux sessions",
+	Long: `List active deep-claude tmux sessions with interactive selection.
 
 Use arrow keys or j/k to navigate, Enter to attach, q to cancel.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -525,11 +525,11 @@ func checkUpdates(autoInstall bool) {
 		printer.Success("Updated to %s, please restart", latestVersion)
 		os.Exit(0)
 	} else {
-		printer.Info("New version available: %s (run 'continuous-claude update' to install)", latestVersion)
+		printer.Info("New version available: %s (run 'dclaude update' to install)", latestVersion)
 	}
 }
 
-// runDetached spawns a tmux session running continuous-claude and returns immediately.
+// runDetached spawns a tmux session running dclaude and returns immediately.
 func runDetached(workDir string, cfg *config.Config) error {
 	printer := ui.NewPrinter(false)
 
@@ -559,9 +559,9 @@ func runDetached(workDir string, cfg *config.Config) error {
 	}
 
 	printer.Success("Started session: %s", sessionName)
-	printer.Info("View logs:   continuous-claude logs %s", sessionName)
-	printer.Info("Attach:      continuous-claude attach %s", sessionName)
-	printer.Info("Kill:        continuous-claude kill %s", sessionName)
+	printer.Info("View logs:   dclaude logs %s", sessionName)
+	printer.Info("Attach:      dclaude attach %s", sessionName)
+	printer.Info("Kill:        dclaude kill %s", sessionName)
 
 	return nil
 }
@@ -594,7 +594,7 @@ func buildCommandArgs(cfg *config.Config) []string {
 	if cfg.MergeStrategy != "squash" {
 		args = append(args, "--merge-strategy", cfg.MergeStrategy)
 	}
-	if cfg.GitBranchPrefix != "continuous-claude/" {
+	if cfg.GitBranchPrefix != "deep-claude/" {
 		args = append(args, "--git-branch-prefix", cfg.GitBranchPrefix)
 	}
 	if cfg.NotesFile != "SHARED_TASK_NOTES.md" {
@@ -608,7 +608,7 @@ func buildCommandArgs(cfg *config.Config) []string {
 	if cfg.DryRun {
 		args = append(args, "--dry-run")
 	}
-	if cfg.CompletionSignal != "CONTINUOUS_CLAUDE_PROJECT_COMPLETE" {
+	if cfg.CompletionSignal != "DEEP_CLAUDE_PROJECT_COMPLETE" {
 		args = append(args, "--completion-signal", cfg.CompletionSignal)
 	}
 	if cfg.CompletionThreshold != 3 {
@@ -619,7 +619,7 @@ func buildCommandArgs(cfg *config.Config) []string {
 	if cfg.Worktree != "" {
 		args = append(args, "--worktree", cfg.Worktree)
 	}
-	if cfg.WorktreeBaseDir != "../continuous-claude-worktrees" {
+	if cfg.WorktreeBaseDir != "../deep-claude-worktrees" {
 		args = append(args, "--worktree-base-dir", cfg.WorktreeBaseDir)
 	}
 	if cfg.CleanupWorktree {

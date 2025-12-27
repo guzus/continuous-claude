@@ -49,11 +49,11 @@ func DefaultConfig() *Config {
 		MaxCost:             0,
 		MaxDuration:         0,
 		MergeStrategy:       "squash",
-		GitBranchPrefix:     "continuous-claude/",
+		GitBranchPrefix:     "deep-claude/",
 		NotesFile:           "SHARED_TASK_NOTES.md",
-		CompletionSignal:    "CONTINUOUS_CLAUDE_PROJECT_COMPLETE",
+		CompletionSignal:    "DEEP_CLAUDE_PROJECT_COMPLETE",
 		CompletionThreshold: 3,
-		WorktreeBaseDir:     "../continuous-claude-worktrees",
+		WorktreeBaseDir:     "../deep-claude-worktrees",
 	}
 }
 

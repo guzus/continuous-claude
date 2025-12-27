@@ -11,10 +11,10 @@ func TestContainsCompletionSignal(t *testing.T) {
 		signal   string
 		expected bool
 	}{
-		{"The project is done. CONTINUOUS_CLAUDE_PROJECT_COMPLETE", "CONTINUOUS_CLAUDE_PROJECT_COMPLETE", true},
-		{"Normal output without signal", "CONTINUOUS_CLAUDE_PROJECT_COMPLETE", false},
-		{"", "CONTINUOUS_CLAUDE_PROJECT_COMPLETE", false},
-		{"CONTINUOUS_CLAUDE_PROJECT_COMPLETE", "", false},
+		{"The project is done. DEEP_CLAUDE_PROJECT_COMPLETE", "DEEP_CLAUDE_PROJECT_COMPLETE", true},
+		{"Normal output without signal", "DEEP_CLAUDE_PROJECT_COMPLETE", false},
+		{"", "DEEP_CLAUDE_PROJECT_COMPLETE", false},
+		{"DEEP_CLAUDE_PROJECT_COMPLETE", "", false},
 		{"", "", false},
 		{"Contains CUSTOM_SIGNAL in text", "CUSTOM_SIGNAL", true},
 	}
@@ -87,11 +87,4 @@ func TestBuildPromptWithoutCompletionSignal(t *testing.T) {
 	if strings.Contains(result, "Project Completion Signal") {
 		t.Error("prompt should not contain completion signal section when signal is empty")
 	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
