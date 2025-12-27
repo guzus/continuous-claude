@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [v0.1.2] - 2025-12-27
+
+### What's Changed
+
+- Update Go version in CI workflow from 1.21 to 1.25 (f7676d9)
+- :bookmark: Release version v0.1.1 (83ffa9b)
+- :bookmark: Release version v0.1.0 (ade256f)
+- Rename project from Continuous Claude to Deep Claude, Bump up to go 1.25 (7935bc7)
+- Add tmux session management commands and detach mode support (3902aa0)
+- Implement DefaultBranch method to retrieve the default branch (main/master) from the remote, updating Orchestrator to use it as the base for PRs instead of the current branch. (bd9e547)
+- Add CLAUDE.md for feature testing instructions and enhance Makefile for remote deployment & Automatically create commits if there isn't (6484bd0)
+
 ## [v0.1.1] - 2025-12-26
 
 ### What's Changed
