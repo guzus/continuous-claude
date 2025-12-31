@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.1.3] - 2025-12-31
+
+### What's Changed
+
+- Update README.md (7e7cc51)
+
 ## [v0.1.2] - 2025-12-27
 
 ### What's Changed
